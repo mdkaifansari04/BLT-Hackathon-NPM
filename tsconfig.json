@@ -1,5 +1,6 @@
 {
   // Visit https://aka.ms/tsconfig to read more about this file
+  "include": ["src/**/*"],
   "compilerOptions": {
     // File Layout
     "rootDir": "./src",
@@ -7,9 +8,10 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    "module": "esnext",
     "target": "esnext",
-    "types": [],
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "moduleResolution": "bundler",
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -35,10 +37,11 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }
