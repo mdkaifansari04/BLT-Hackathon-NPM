@@ -3,10 +3,88 @@
  * Handles all interactions with the GitHub API
  */
 
+import { GithubIssue } from "../types/github/issue";
+import { GithubPR } from "../types/github/pr";
+import { GithubPRReview } from "../types/github/review";
+
+// Type definitions for internal data structures
+export interface RepoStats {
+  total: number;
+  merged: number;
+  issues: number;
+  closedIssues: number;
+}
+
+export interface DailyActivity {
+  total: number;
+  merged: number;
+}
+
+export interface ParticipantData {
+  user: {
+    username: string;
+    email: string;
+    id: string;
+  };
+  count: number;
+  prs: GithubPR[];
+  is_contributor: boolean;
+  avatar: string;
+  url: string;
+  reviews: GithubPRReview[];
+  reviewCount: number;
+  mergedCount: number;
+}
+
+export interface PRStats {
+  totalPRs: number;
+  totalIssues: number;
+  closedIssues: number;
+  mergedPRs: number;
+  participants: Map<string, ParticipantData>;
+  dailyActivity: Record<string, DailyActivity>;
+  repoStats: Record<string, RepoStats>;
+}
+
+export interface LeaderboardEntry {
+  user: {
+    username: string;
+    email: string;
+    id: string;
+  };
+  count: number;
+  prs: GithubPR[];
+  is_contributor: boolean;
+  username: string;
+  avatar: string;
+  url: string;
+  mergedCount: number;
+}
+
+export interface ReviewLeaderboardEntry {
+  user: {
+    username: string;
+    email: string;
+    id: string;
+  };
+  count: number;
+  reviews: GithubPRReview[];
+  is_contributor: boolean;
+  username: string;
+  avatar: string;
+  url: string;
+  reviewCount: number;
+}
+
+export interface IssueStats {
+  totalIssues: number;
+  closedIssues: number;
+}
+
 export class GitHubAPI {
   token: string;
   baseURL: string;
-  cache: Map<string, { data: any; timestamp: number }>;
+  cache: Map<string, { data: unknown; timestamp: number }>;
 
   constructor(token: string) {
     this.token = token;
@@ -76,7 +154,7 @@ export class GitHubAPI {
    * Fetch all issues for a repository
    */
   async fetchIssues(owner: string, repo: string, startDate: Date, endDate: Date) {
-    const allIssues = [];
+    const allIssues: GithubIssue[] = [];
     let page = 1;
     const perPage = 100; // GitHub max is 100
     const maxPages = 20;
@@ -137,7 +215,7 @@ export class GitHubAPI {
    * Fetch all pull requests for a repository
    */
   async fetchPullRequests(owner: string, repo: string, startDate: Date, endDate: Date) {
-    const allPRs = [];
+    const allPRs: GithubPR[] = [];
     let page = 1;
     const perPage = 100; // max is 100 item per page
     const maxPages = 20;
@@ -226,7 +304,7 @@ export class GitHubAPI {
    * Fetch all reviews for multiple repositories within timeframe
    */
   async getAllReviews(repositories: string[], startDate: Date, endDate: Date) {
-    const allReviews: any[] = [];
+    const allReviews: GithubPRReview[] = [];
 
     for (const repoPath of repositories) {
       const [owner, repo] = repoPath.split("/");
@@ -239,7 +317,7 @@ export class GitHubAPI {
       reviewResults.forEach((result, index) => {
         if (result.status === "fulfilled") {
           const pr = prs[index];
-          result.value.forEach((review: any) => {
+          result.value.forEach((review: GithubPRReview) => {
             const submittedAt = new Date(review.submitted_at);
             if (submittedAt >= startDate && submittedAt <= endDate) {
               allReviews.push({
@@ -269,7 +347,7 @@ export class GitHubAPI {
     const results = await Promise.allSettled(promises);
 
     // Combine all successful results
-    const allIssues: any[] = [];
+    const allIssues: GithubIssue[] = [];
     results.forEach((result, index) => {
       if (result.status === "fulfilled") {
         allIssues.push(...result.value);
@@ -293,7 +371,7 @@ export class GitHubAPI {
     const results = await Promise.allSettled(promises);
 
     // Combine all successful results
-    const allPRs: any[] = [];
+    const allPRs: GithubPR[] = [];
     results.forEach((result, index) => {
       if (result.status === "fulfilled") {
         allPRs.push(...result.value);
@@ -330,7 +408,7 @@ export class GitHubAPI {
    * @param {Object} repoStats - Repository statistics object (will be modified)
    * @returns {Object} Summary with totalIssues and closedIssues counts
    */
-  processIssueData(issues: any[], repoStats: any) {
+  processIssueData(issues: GithubIssue[], repoStats: Record<string, RepoStats>): IssueStats {
     issues.forEach((issue) => {
       const repo = issue.repository;
       if (!repoStats[repo]) {
@@ -351,19 +429,21 @@ export class GitHubAPI {
   /**
    * Process PRs and generate statistics - matching Python implementation logic
    */
-  processPRData(prs: any[], startDate: Date, endDate: Date) {
-    const stats: any = {
+  processPRData(prs: GithubPR[], startDate: Date, endDate: Date): PRStats {
+    const stats: PRStats = {
       totalPRs: prs.length,
+      totalIssues: 0,
+      closedIssues: 0,
       mergedPRs: 0,
-      participants: new Map(),
-      dailyActivity: {} as any,
-      repoStats: {} as any,
+      participants: new Map<string, ParticipantData>(),
+      dailyActivity: {},
+      repoStats: {},
     };
     startDate = new Date(startDate);
     endDate = new Date(endDate);
 
     // Group PRs by user
-    const leaderboard: any = {};
+    const leaderboard: Record<string, ParticipantData> = {};
 
     // Process each PR
     prs.forEach((pr) => {
@@ -421,7 +501,7 @@ export class GitHubAPI {
         stats.dailyActivity[createdDate].total++;
       }
 
-      if (isMerged) {
+      if (isMerged && pr.merged_at) {
         const mergedDate = new Date(pr.merged_at).toISOString().split("T")[0];
         if (stats.dailyActivity[mergedDate]) {
           stats.dailyActivity[mergedDate].merged++;
@@ -440,7 +520,7 @@ export class GitHubAPI {
     });
 
     // Convert leaderboard object to Map for consistency with existing code
-    Object.values(leaderboard).forEach((participant: any) => {
+    Object.values(leaderboard).forEach((participant: ParticipantData) => {
       // Don't overwrite mergedCount - keep it separate from total count
       stats.participants.set(participant.user.username, participant);
     });
@@ -451,7 +531,7 @@ export class GitHubAPI {
   /**
    * Process review data and integrate with participant stats - matching Python logic
    */
-  processReviewData(reviews: any[], participants: Map<string, any>) {
+  processReviewData(reviews: GithubPRReview[], participants: Map<string, ParticipantData>): void {
     reviews.forEach((review) => {
       const username = review.user.login;
       const isBot = username.includes("[bot]") || username.toLowerCase().includes("bot");
@@ -478,11 +558,13 @@ export class GitHubAPI {
         }
 
         const participant = participants.get(username);
-        participant.reviews.push({
-          ...review,
-          html_url: review.pull_request_url || review.html_url,
-        });
-        participant.reviewCount++;
+        if (participant) {
+          participant.reviews.push({
+            ...review,
+            html_url: review.pull_request_url || review.html_url,
+          });
+          participant.reviewCount++;
+        }
       }
     });
   }
@@ -490,22 +572,18 @@ export class GitHubAPI {
   /**
    * Generate leaderboard from participants - matching Python return structure
    */
-  generateLeaderboard(participants: Map<string, any>, limit = 10) {
+  generateLeaderboard(participants: Map<string, ParticipantData>, limit = 10): LeaderboardEntry[] {
     return Array.from(participants.values())
       .filter((p) => p.mergedCount > 0) // Only show participants with merged PRs
       .sort((a, b) => b.mergedCount - a.mergedCount)
       .slice(0, limit)
       .map((p) => ({
-        user: p.user || {
-          username: p.username,
-          email: "",
-          id: p.user?.id || `contributor_${p.username}`,
-        },
+        user: p.user,
         count: p.mergedCount,
         prs: p.prs,
         is_contributor: p.is_contributor,
         // Keep original structure for rendering
-        username: p.user?.username || p.username,
+        username: p.user.username,
         avatar: p.avatar,
         url: p.url,
         mergedCount: p.mergedCount,
@@ -515,22 +593,18 @@ export class GitHubAPI {
   /**
    * Generate review leaderboard from participants - matching Python return structure
    */
-  generateReviewLeaderboard(participants: Map<string, any>, limit = 10) {
+  generateReviewLeaderboard(participants: Map<string, ParticipantData>, limit = 10): ReviewLeaderboardEntry[] {
     return Array.from(participants.values())
       .filter((p) => p.reviewCount > 0) // Only show participants with reviews
       .sort((a, b) => b.reviewCount - a.reviewCount)
       .slice(0, limit)
       .map((p) => ({
-        user: p.user || {
-          username: p.username,
-          email: "",
-          id: p.user?.id || `contributor_${p.username}`,
-        },
+        user: p.user,
         count: p.reviewCount,
         reviews: p.reviews,
         is_contributor: p.is_contributor,
         // Keep original structure for rendering
-        username: p.user?.username || p.username,
+        username: p.user.username,
         avatar: p.avatar,
         url: p.url,
         reviewCount: p.reviewCount,
