@@ -1,3 +1,6 @@
+import { GithubPR } from "../../types/github/pr";
+import { GithubPRReview } from "../../types/github/review";
+
 // Type definitions for internal data structures
 export interface DailyActivity {
   total: number;

@@ -38,6 +38,16 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       const issues = await githubApi.getAllIssues(config.github.repositories, startDate, endDate);
       const reviews = await githubApi.getAllReviews(config.github.repositories, startDate, endDate);
       const stats = await githubApi.processPRData(prs, startDate, endDate);
+
+      // Process review data BEFORE generating review leaderboard
+      githubApi.processReviewData(reviews, stats.participants);
+
+      // Process issue data
+      const issueStats = githubApi.processIssueData(issues, stats.repoStats);
+      stats.totalIssues = issueStats.totalIssues;
+      stats.closedIssues = issueStats.closedIssues;
+
+      // Generate leaderboards AFTER all data is processed
       const leaderboard = githubApi.generateLeaderboard(stats.participants, config.display.maxLeaderboardEntries);
       const reviewLeaderboard = githubApi.generateReviewLeaderboard(stats.participants, config.display.maxLeaderboardEntries);
 
@@ -46,15 +56,9 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       setReviews(reviews);
       setStats(stats);
       setLeaderboard(leaderboard);
-      // Process review data
-      githubApi.processReviewData(reviews, stats.participants);
-      const issueStats = githubApi.processIssueData(issues, stats.repoStats);
-
-      stats.totalIssues = issueStats.totalIssues;
-      stats.closedIssues = issueStats.closedIssues;
+      setReviewLeaderboard(reviewLeaderboard);
       setLoading(false);
     };
-
     if (config.github.token) fetchData();
   }, [config]);
 

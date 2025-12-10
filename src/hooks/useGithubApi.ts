@@ -452,8 +452,6 @@ export class GitHubAPI {
       stats.participants.set(participant.user.username, participant);
     });
 
-    console.log("inner stats", stats);
-
     return stats;
   }
 
