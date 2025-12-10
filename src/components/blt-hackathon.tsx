@@ -13,6 +13,7 @@ import { GithubIssue } from "../../types/github/issue";
 import { GithubPRReview } from "../../types/github/review";
 import { HackathonConfig } from "../../types/config";
 import Repository from "./repository";
+import Prizes from "./prizes";
 
 const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const githubApi = new GitHubAPI(config.github.token);
@@ -62,6 +63,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
           <div className="lg:col-span-2">
             <Description description={config.description!} rules={config.rules!} />
             {stats && <Repository repository={config.github.repositories} stats={stats} showRepositoryStats={config.display.showRepoStats} />}
+            <Prizes prize={config.prizes} />
           </div>
           {/* right column*/}
           <div className="lg:col-span-2"></div>
