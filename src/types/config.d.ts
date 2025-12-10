@@ -2,10 +2,8 @@ export interface HackathonConfig {
   name: string;
   description?: string;
   rules?: string;
-
   startTime: string; // ISO 8601
   endTime: string; // ISO 8601
-
   github: {
     token: string;
     repositories: string[];
