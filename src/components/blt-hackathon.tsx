@@ -71,7 +71,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
             <Prizes prize={config.prizes} />
           </div>
           {/* right column*/}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Leaderboard showPrs={config.display.showPRsInLeaderboard} leaderboard={leaderboard} />
           </div>
         </div>
