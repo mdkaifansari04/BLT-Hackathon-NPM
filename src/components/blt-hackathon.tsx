@@ -7,13 +7,14 @@ import PrActivityChart from "./pr-activity-chart";
 import Description from "./description";
 
 import { GitHubAPI } from "../hooks/useGithubApi";
-import { PRStats } from "../hooks/type";
+import { LeaderboardEntry, PRStats } from "../hooks/type";
 import { GithubPR } from "../../types/github/pr";
 import { GithubIssue } from "../../types/github/issue";
 import { GithubPRReview } from "../../types/github/review";
 import { HackathonConfig } from "../../types/config";
 import Repository from "./repository";
 import Prizes from "./prizes";
+import Leaderboard from "./leaderboard";
 
 const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const githubApi = new GitHubAPI(config.github.token);
@@ -24,6 +25,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const [issues, setIssues] = React.useState<GithubIssue[]>([]);
   const [reviews, setReviews] = React.useState<GithubPRReview[]>([]);
   const [stats, setStats] = React.useState<PRStats | null>(null);
+  const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -33,11 +35,13 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       const issues = await githubApi.getAllIssues(config.github.repositories, startDate, endDate);
       const reviews = await githubApi.getAllReviews(config.github.repositories, startDate, endDate);
       const stats = await githubApi.processPRData(prs, startDate, endDate);
+      const leaderboard = githubApi.generateLeaderboard(stats.participants, config.display.maxLeaderboardEntries);
 
       setPrs(prs);
       setIssues(issues);
       setReviews(reviews);
       setStats(stats);
+      setLeaderboard(leaderboard);
       // Process review data
       githubApi.processReviewData(reviews, stats.participants);
       const issueStats = githubApi.processIssueData(issues, stats.repoStats);
@@ -45,6 +49,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       stats.totalIssues = issueStats.totalIssues;
       stats.closedIssues = issueStats.closedIssues;
       setLoading(false);
+      console.log("stats", stats);
     };
 
     if (config.github.token) fetchData();
@@ -66,7 +71,9 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
             <Prizes prize={config.prizes} />
           </div>
           {/* right column*/}
-          <div className="lg:col-span-2"></div>
+          <div className="lg:col-span-2">
+            <Leaderboard showPrs={config.display.showPRsInLeaderboard} leaderboard={leaderboard} />
+          </div>
         </div>
       </main>
       <Footer />
