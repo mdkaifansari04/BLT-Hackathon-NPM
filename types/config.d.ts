@@ -7,7 +7,7 @@ export interface HackathonConfig {
   endTime: string; // ISO 8601
 
   github: {
-    token?: string;
+    token: string;
     repositories: string[];
   };
 
