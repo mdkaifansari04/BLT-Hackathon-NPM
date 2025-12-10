@@ -3,9 +3,9 @@
  * Handles all interactions with the GitHub API
  */
 
-import { GithubIssue } from "../types/github/issue";
-import { GithubPR } from "../types/github/pr";
-import { GithubPRReview } from "../types/github/review";
+import { GithubIssue } from "../../types/github/issue";
+import { GithubPR } from "../../types/github/pr";
+import { GithubPRReview } from "../../types/github/review";
 
 // Type definitions for internal data structures
 export interface RepoStats {
