@@ -1,5 +1,5 @@
 import React from "react";
-import { LeaderboardEntry, PRStats } from "../hooks/type";
+import { LeaderboardEntry, PRStats } from "../../hooks/type";
 import { Trophy } from "lucide-react";
 
 interface LeaderboardProps {
@@ -7,7 +7,7 @@ interface LeaderboardProps {
   showPrs: boolean;
 }
 
-function Leaderboard(props: LeaderboardProps) {
+function PRLeaderboard(props: LeaderboardProps) {
   if (props.leaderboard.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -106,4 +106,4 @@ function LeaderboardCard(props: LeaderboardCardProps) {
   );
 }
 
-export default Leaderboard;
+export default PRLeaderboard;

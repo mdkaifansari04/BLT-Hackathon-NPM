@@ -7,14 +7,15 @@ import PrActivityChart from "./pr-activity-chart";
 import Description from "./description";
 
 import { GitHubAPI } from "../hooks/useGithubApi";
-import { LeaderboardEntry, PRStats } from "../hooks/type";
+import { LeaderboardEntry, PRStats, ReviewLeaderboardEntry } from "../hooks/type";
 import { GithubPR } from "../../types/github/pr";
 import { GithubIssue } from "../../types/github/issue";
 import { GithubPRReview } from "../../types/github/review";
 import { HackathonConfig } from "../../types/config";
 import Repository from "./repository";
 import Prizes from "./prizes";
-import Leaderboard from "./leaderboard";
+import PRLeaderboard from "./leaderboard/pr-leaderboard";
+import ReviewLeaderboard from "./leaderboard/review-leaderboard";
 
 const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const githubApi = new GitHubAPI(config.github.token);
@@ -26,6 +27,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const [reviews, setReviews] = React.useState<GithubPRReview[]>([]);
   const [stats, setStats] = React.useState<PRStats | null>(null);
   const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
+  const [reviewLeaderboard, setReviewLeaderboard] = React.useState<ReviewLeaderboardEntry[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -36,6 +38,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       const reviews = await githubApi.getAllReviews(config.github.repositories, startDate, endDate);
       const stats = await githubApi.processPRData(prs, startDate, endDate);
       const leaderboard = githubApi.generateLeaderboard(stats.participants, config.display.maxLeaderboardEntries);
+      const reviewLeaderboard = githubApi.generateReviewLeaderboard(stats.participants, config.display.maxLeaderboardEntries);
 
       setPrs(prs);
       setIssues(issues);
@@ -63,7 +66,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
         <Stats participantCount={stats?.participants.size || 0} issueCount={stats?.totalIssues || 0} mergedPrCount={stats?.mergedPRs || 0} repoCount={config.github.repositories.length} />
         {stats && <PrActivityChart dailyActivity={stats.dailyActivity} prs={prs} />}
         {/* Main content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* left column */}
           <div className="lg:col-span-2">
             <Description description={config.description!} rules={config.rules!} />
@@ -72,7 +75,8 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
           </div>
           {/* right column*/}
           <div className="lg:col-span-1">
-            <Leaderboard showPrs={config.display.showPRsInLeaderboard} leaderboard={leaderboard} />
+            <PRLeaderboard showPrs={config.display.showPRsInLeaderboard} leaderboard={leaderboard} />
+            <ReviewLeaderboard leaderboard={reviewLeaderboard} />
           </div>
         </div>
       </main>
