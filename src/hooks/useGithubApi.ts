@@ -6,80 +6,7 @@
 import { GithubIssue } from "../../types/github/issue";
 import { GithubPR } from "../../types/github/pr";
 import { GithubPRReview } from "../../types/github/review";
-
-// Type definitions for internal data structures
-export interface RepoStats {
-  total: number;
-  merged: number;
-  issues: number;
-  closedIssues: number;
-}
-
-export interface DailyActivity {
-  total: number;
-  merged: number;
-}
-
-export interface ParticipantData {
-  user: {
-    username: string;
-    email: string;
-    id: string;
-  };
-  count: number;
-  prs: GithubPR[];
-  is_contributor: boolean;
-  avatar: string;
-  url: string;
-  reviews: GithubPRReview[];
-  reviewCount: number;
-  mergedCount: number;
-}
-
-export interface PRStats {
-  totalPRs: number;
-  totalIssues: number;
-  closedIssues: number;
-  mergedPRs: number;
-  participants: Map<string, ParticipantData>;
-  dailyActivity: Record<string, DailyActivity>;
-  repoStats: Record<string, RepoStats>;
-}
-
-export interface LeaderboardEntry {
-  user: {
-    username: string;
-    email: string;
-    id: string;
-  };
-  count: number;
-  prs: GithubPR[];
-  is_contributor: boolean;
-  username: string;
-  avatar: string;
-  url: string;
-  mergedCount: number;
-}
-
-export interface ReviewLeaderboardEntry {
-  user: {
-    username: string;
-    email: string;
-    id: string;
-  };
-  count: number;
-  reviews: GithubPRReview[];
-  is_contributor: boolean;
-  username: string;
-  avatar: string;
-  url: string;
-  reviewCount: number;
-}
-
-export interface IssueStats {
-  totalIssues: number;
-  closedIssues: number;
-}
+import { IssueStats, LeaderboardEntry, ParticipantData, PRStats, RepoStats, ReviewLeaderboardEntry } from "./type";
 
 export class GitHubAPI {
   token: string;
@@ -429,7 +356,7 @@ export class GitHubAPI {
   /**
    * Process PRs and generate statistics - matching Python implementation logic
    */
-  processPRData(prs: GithubPR[], startDate: Date, endDate: Date): PRStats {
+  async processPRData(prs: GithubPR[], startDate: Date, endDate: Date): Promise<PRStats> {
     const stats: PRStats = {
       totalPRs: prs.length,
       totalIssues: 0,
@@ -524,6 +451,8 @@ export class GitHubAPI {
       // Don't overwrite mergedCount - keep it separate from total count
       stats.participants.set(participant.user.username, participant);
     });
+
+    console.log("inner stats", stats);
 
     return stats;
   }
