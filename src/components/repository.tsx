@@ -29,8 +29,6 @@ function Repository(props: RepositoryProps) {
 }
 
 function RepositoryCard(props: RepositoryCardProps) {
-  console.log("props", props);
-
   const eachRepoStats = props.stats.repoStats[props.repoPath] || { total: 0, merged: 0, issues: 0, closedIssues: 0 };
   return (
     <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
@@ -38,7 +36,7 @@ function RepositoryCard(props: RepositoryCardProps) {
         <div className="flex items-center">
           <i className="fab fa-github text-gray-600 mr-2"></i>
           <a href={`https://github.com/${props.repoPath}`} target="_blank" className="font-medium hover:text-red-600">
-            ${props.repoPath}
+            {props.repoPath}
           </a>
         </div>
       </div>
@@ -46,11 +44,11 @@ function RepositoryCard(props: RepositoryCardProps) {
         <div className="flex gap-4 text-sm text-gray-600 mb-2">
           <span className="flex items-center">
             <i className="fas fa-code-branch mr-1 text-blue-500"></i>
-            <strong>${eachRepoStats.total}</strong> PRs (<strong>${eachRepoStats.merged}</strong> merged)
+            <strong>{eachRepoStats.total}</strong> PRs (<strong>{eachRepoStats.merged}</strong> merged)
           </span>
           <span className="flex items-center">
             <i className="fas fa-circle-dot mr-1 text-green-500"></i>
-            <strong>${eachRepoStats.issues || 0}</strong> Issues (<strong>${eachRepoStats.closedIssues || 0}</strong> closed)
+            <strong>{eachRepoStats.issues || 0}</strong> Issues (<strong>{eachRepoStats.closedIssues || 0}</strong> closed)
           </span>
         </div>
       )}
