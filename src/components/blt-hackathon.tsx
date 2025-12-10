@@ -9,6 +9,7 @@ import { GithubPR } from "../../types/github/pr";
 import { GithubIssue } from "../../types/github/issue";
 import { GithubPRReview } from "../../types/github/review";
 import { HackathonConfig } from "../../types/config";
+import PrActivityChart from "./pr-activity-chart";
 
 const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const githubApi = new GitHubAPI(config.github.token);
