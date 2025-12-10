@@ -1,19 +1,18 @@
 import React from "react";
 
-function Header(props: { endDate: Date }) {
+function Header(props: { endDate: Date; startDate: Date }) {
   const currentDate = Date.now();
   const isOngoing = currentDate < props.endDate.getTime();
   let status, statusClass, timeRemaining;
-  const now = new Date();
-  const startDate = new Date(props.endDate);
+  const startDate = new Date(props.startDate);
   const endDate = new Date(props.endDate);
 
-  if (now < startDate) {
+  if (currentDate < startDate.getTime()) {
     status = "Upcoming";
     statusClass = "bg-blue-100 text-blue-800";
-    const daysUntil = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const daysUntil = Math.ceil((startDate.getTime() - currentDate) / (1000 * 60 * 60 * 24));
     timeRemaining = `Starts in ${daysUntil} day${daysUntil !== 1 ? "s" : ""}`;
-  } else if (now > endDate) {
+  } else if (currentDate > endDate.getTime()) {
     status = "Ended";
     statusClass = "bg-gray-100 text-gray-800";
     timeRemaining = "This hackathon has ended";
