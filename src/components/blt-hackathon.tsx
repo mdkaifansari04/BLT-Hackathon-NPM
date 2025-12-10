@@ -16,6 +16,7 @@ import Repository from "./repository";
 import Prizes from "./prizes";
 import PRLeaderboard from "./leaderboard/pr-leaderboard";
 import ReviewLeaderboard from "./leaderboard/review-leaderboard";
+import SponsorLeaderboard from "./leaderboard/sponser-leaderboard";
 
 const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
   const githubApi = new GitHubAPI(config.github.token);
@@ -52,7 +53,6 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       stats.totalIssues = issueStats.totalIssues;
       stats.closedIssues = issueStats.closedIssues;
       setLoading(false);
-      console.log("stats", stats);
     };
 
     if (config.github.token) fetchData();
@@ -77,6 +77,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
           <div className="lg:col-span-1">
             <PRLeaderboard showPrs={config.display.showPRsInLeaderboard} leaderboard={leaderboard} />
             <ReviewLeaderboard leaderboard={reviewLeaderboard} />
+            <SponsorLeaderboard sponsors={config.sponsors} sponsorNote={config.sponsorNote} sponsorLink={config.sponsorLink} />
           </div>
         </div>
       </main>
