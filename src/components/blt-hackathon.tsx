@@ -26,10 +26,20 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       const prs = await githubApi.getAllPullRequests(config.github.repositories, startDate, endDate);
       const issues = await githubApi.getAllIssues(config.github.repositories, startDate, endDate);
       const reviews = await githubApi.getAllReviews(config.github.repositories, startDate, endDate);
-      const stats = await githubApi.processPRData(prs, startDate, endDate);
+      const stats = githubApi.processPRData(prs, startDate, endDate);
+
+      // Process review data
+      githubApi.processReviewData(reviews, stats.participants);
+
+      // Process issue data
+      const issueStats = githubApi.processIssueData(issues, stats.repoStats);
+      stats.totalIssues = issueStats.totalIssues;
+      stats.closedIssues = issueStats.closedIssues;
+
       setPrs(prs);
       setIssues(issues);
       setReviews(reviews);
+      setStats(stats);
     };
 
     if (config.github.token) fetchData();
@@ -41,6 +51,7 @@ const BLTHackathon = ({ config }: { config: HackathonConfig }) => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Banner hackathonName={config.name} startDate={config.startTime} endDate={config.endTime} />
         <Stats participantCount={stats?.participants.size || 0} issueCount={stats?.totalIssues || 0} mergedPrCount={stats?.mergedPRs || 0} repoCount={config.github.repositories.length} />
+        {stats && <PrActivityChart dailyActivity={stats.dailyActivity} prs={prs} />}
       </main>
       <Footer />
     </>
