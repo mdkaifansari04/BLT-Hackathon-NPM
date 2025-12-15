@@ -1,6 +1,5 @@
-import React from "react";
-import { Prize } from "../../types/config";
 import { Trophy } from "lucide-react";
+import { Prize } from "../../types/config";
 
 function Prizes(props: { prize: Prize[] }) {
   return (

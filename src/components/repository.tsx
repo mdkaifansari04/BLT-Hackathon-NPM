@@ -1,5 +1,4 @@
-import React from "react";
-import { IssueStats, PRStats } from "../hooks/type";
+import { PRStats } from "../hooks/type";
 
 interface RepositoryProps {
   stats: PRStats;
